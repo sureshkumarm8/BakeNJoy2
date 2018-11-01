@@ -52,13 +52,13 @@ public class StepRecyclerAdapter extends RecyclerView.Adapter<StepRecyclerAdapte
                 bundle.putParcelable(Constants.STEP, step);
                 bundle.putParcelable(Constants.RECIPE, mRecipe);
 
-                VideoInstructionsFragment recipeDetailFragment = new VideoInstructionsFragment();
-                recipeDetailFragment.setArguments(bundle);
+                VideoInstructionsFragment videosInstructionFragment = new VideoInstructionsFragment();
+                videosInstructionFragment.setArguments(bundle);
 
                 android.support.v4.app.FragmentManager fragmentManager =((DetailsActivity)mContext).getSupportFragmentManager();
                 if(fragmentManager != null) {
                     fragmentManager.beginTransaction()
-                            .replace(R.id.details_frame_layout, recipeDetailFragment)
+                            .replace(R.id.details_frame_layout, videosInstructionFragment)
                             .addToBackStack(Constants.INSTRUCTIONS_FRAGMENT)
                             .commit();
                 }
