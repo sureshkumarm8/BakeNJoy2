@@ -20,7 +20,21 @@
             </intent-filter>
         </activity>
         <activity android:name=".adaptor.MainRecipeAdaptor" />
-        <activity android:name=".DetailsActivity"></activity>
+        <activity android:name=".DetailsActivity" />
+
+        <receiver android:name=".Widget.BakeAppWidget">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/bake_app_widget_info" />
+        </receiver>
+
+        <service
+            android:name=".Widget.UpdateService"
+            android:enabled="true"></service>
     </application>
 
 </manifest>

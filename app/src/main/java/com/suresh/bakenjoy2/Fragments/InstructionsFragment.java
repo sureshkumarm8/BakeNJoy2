@@ -67,7 +67,13 @@ public class InstructionsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
+
+        if(savedInstanceState != null){
+            mBundle = savedInstanceState.getBundle(Constants.RECIPE_BUNDLE);
+            if(mBundle != null) {
+                mRecipe = mBundle.getParcelable(Constants.RECIPE);
+            }
+        } else {
             mBundle = getArguments();
             if(mBundle != null) {
                 mRecipe = mBundle.getParcelable(Constants.RECIPE);
@@ -79,6 +85,7 @@ public class InstructionsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_instructions, container, false);
+
         setRecyclerView(rootView);
         setIngredientsView(rootView);
         return rootView;
@@ -158,5 +165,13 @@ public class InstructionsFragment extends Fragment {
                 }
             }
         });
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if(mBundle != null){
+            outState.putBundle(Constants.RECIPE_BUNDLE , mBundle);
+        }
     }
 }

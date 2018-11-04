@@ -1,5 +1,10 @@
 package com.suresh.bakenjoy2.Utils;
 
+import android.content.Context;
+import android.preference.PreferenceManager;
+
+import com.suresh.bakenjoy2.R;
+
 public class Constants {
 
     public static final String RECIPE_URL = "https://d17h27t6h515a5.cloudfront.net/topher/2017/May/59121517_baking/baking.json";
@@ -29,5 +34,7 @@ public class Constants {
     public static final String STEP_FRAGMENT = "step_fragment";
     public static final String CURRENT_FRAGMENT = "current_fragment";
     public static final String CURRENT_POSITION = "current_position";
+
+    public static String SHARED_PREFERENCES = "MyPrefs";
 
 }

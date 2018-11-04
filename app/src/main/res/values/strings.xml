@@ -11,4 +11,15 @@
     <string name="steps">Steps</string>
     <string name="next_step">Next Step</string>
     <string name="previous_step">Previous Step</string>
+    <string name="appwidget_text">RECIPE NAME</string>
+    <string name="add_widget">Recipe</string>
+
+
+    <string-array name="recipes_array">
+        <item>Select favorite recipe</item>
+        <item>Nutella Pie</item>
+        <item>Brownies</item>
+        <item>Yellow Cake</item>
+        <item>Cheesecake</item>
+    </string-array>
 </resources>

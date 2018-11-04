@@ -65,11 +65,17 @@ public class IngredientsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
+
+        super.onCreate(savedInstanceState);
+        if(savedInstanceState != null){
+            mBundle = savedInstanceState.getBundle(Constants.RECIPE_BUNDLE);
+            if(mBundle != null) {
+                mRecipe = mBundle.getParcelable(Constants.RECIPE);
+            }
+        } else {
             mBundle = getArguments();
             if(mBundle != null) {
                 mRecipe = mBundle.getParcelable(Constants.RECIPE);
-                Toast.makeText(getActivity(),mBundle.toString(),Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -131,5 +137,13 @@ public class IngredientsFragment extends Fragment {
         mRecyclerView.setLayoutManager(linearLayoutManager);
         IngredientsAdaptor ingredientsRecyclerAdapter = new IngredientsAdaptor(mRecipe.getIngredients(), getContext());
         mRecyclerView.setAdapter(ingredientsRecyclerAdapter);
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if(mBundle != null){
+            outState.putBundle(Constants.RECIPE_BUNDLE , mBundle);
+        }
     }
 }

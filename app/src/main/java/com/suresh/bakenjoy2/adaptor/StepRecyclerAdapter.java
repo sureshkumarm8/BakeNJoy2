@@ -41,13 +41,14 @@ public class StepRecyclerAdapter extends RecyclerView.Adapter<StepRecyclerAdapte
     }
 
     @Override
-    public void onBindViewHolder(@NonNull StepRecyclerAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final StepRecyclerAdapter.ViewHolder holder, int position) {
         final Step step = mStepList.get(position);
         holder.mStepText.setText(step.getShortDescription());
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                holder.mStepArrow.setVisibility(View.VISIBLE);
                 Bundle bundle = new Bundle();
                 bundle.putParcelable(Constants.STEP, step);
                 bundle.putParcelable(Constants.RECIPE, mRecipe);
@@ -74,10 +75,11 @@ public class StepRecyclerAdapter extends RecyclerView.Adapter<StepRecyclerAdapte
     class ViewHolder extends RecyclerView.ViewHolder {
 
         TextView mStepText;
-
+        TextView mStepArrow;
         ViewHolder(View itemView) {
             super(itemView);
            mStepText = itemView.findViewById(R.id.list_recipe_step_tv);
+           mStepArrow = itemView.findViewById(R.id.list_recipe_step_arrow);
         }
     }
 }

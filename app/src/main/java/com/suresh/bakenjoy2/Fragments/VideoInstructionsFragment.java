@@ -1,9 +1,11 @@
 package com.suresh.bakenjoy2.Fragments;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
@@ -38,14 +40,11 @@ import com.suresh.bakenjoy2.datamodel.Step;
  * Activities that contain this fragment must implement the
  * {@link VideoInstructionsFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link VideoInstructionsFragment#newInstance} factory method to
+ * Use the  factory method to
  * create an instance of this fragment.
  */
 public class VideoInstructionsFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+
 
     public SimpleExoPlayerView mPlayerView;
     public SimpleExoPlayer mExoPlayer;
@@ -66,28 +65,19 @@ public class VideoInstructionsFragment extends Fragment {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment VideoInstructionsFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static VideoInstructionsFragment newInstance(String param1, String param2) {
-        VideoInstructionsFragment fragment = new VideoInstructionsFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
+
+        if(savedInstanceState != null){
+            mResumePosition = savedInstanceState.getLong(Constants.CURRENT_POSITION);
+            mBundle = savedInstanceState.getBundle(Constants.STEP_BUNDLE);
+            if(mBundle != null) {
+                mStep = mBundle.getParcelable(Constants.STEP);
+                mRecipe = mBundle.getParcelable(Constants.RECIPE);
+            }
+        } else {
             mBundle = getArguments();
             if(mBundle != null) {
                 mStep = mBundle.getParcelable(Constants.STEP);
@@ -115,11 +105,6 @@ public class VideoInstructionsFragment extends Fragment {
             mPlayerView.setVisibility(View.VISIBLE);
             initPlayer(Uri.parse(mStep.getVideoURL()));
         }else {
-           /*
-            The below method does not want to work and I have no clue why, I cant find if it was deprecated or not but
-            the method setDefaultArtwork does not exist, so I am using an ImageView for when there is no video.
-             */
-//            mPlayerView.setDefaultArtwork(BitmapFactory.decodeResource(getResources(), R.mipmap.baking_image));
 
             mPlayerView.setVisibility(View.GONE);
             mImageView.setVisibility(View.VISIBLE);
@@ -132,12 +117,6 @@ public class VideoInstructionsFragment extends Fragment {
         return rootView;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
 
     @Override
     public void onAttach(Context context) {
@@ -296,6 +275,39 @@ public class VideoInstructionsFragment extends Fragment {
             mExoPlayer.stop();
             mExoPlayer.release();
             mExoPlayer = null;
+        }
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+
+        super.onConfigurationChanged(newConfig);
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) mPlayerView.getLayoutParams();
+            params.width= ViewGroup.LayoutParams.MATCH_PARENT;
+            params.height= ViewGroup.LayoutParams.MATCH_PARENT;
+            mPlayerView.setLayoutParams(params);
+            mScrollView.setVisibility(View.GONE);
+            getActivity().getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE);
+            ((DetailsActivity) getActivity()).getSupportActionBar().hide();
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) mPlayerView.getLayoutParams();
+            params.width= ConstraintLayout.LayoutParams.MATCH_CONSTRAINT;
+            params.height= ConstraintLayout.LayoutParams.MATCH_CONSTRAINT;
+            mPlayerView.setLayoutParams(params);
+            mScrollView.setVisibility(View.VISIBLE);
+            getActivity().getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+            ((DetailsActivity) getActivity()).getSupportActionBar().show();
+        }
+    }
+
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if(mBundle != null){
+            outState.putBundle(Constants.STEP_BUNDLE , mBundle);
+            outState.putLong(Constants.CURRENT_POSITION, mResumePosition);
         }
     }
 }
