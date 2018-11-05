@@ -2,6 +2,7 @@ package com.suresh.bakenjoy2.Utils;
 
 import android.content.Context;
 import android.preference.PreferenceManager;
+import android.support.test.espresso.IdlingResource;
 
 import com.suresh.bakenjoy2.R;
 
@@ -36,5 +37,7 @@ public class Constants {
     public static final String CURRENT_POSITION = "current_position";
 
     public static String SHARED_PREFERENCES = "MyPrefs";
+
+
 
 }

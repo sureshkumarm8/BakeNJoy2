@@ -4,13 +4,17 @@ import android.annotation.SuppressLint;
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.widget.RemoteViews;
 
 import com.suresh.bakenjoy2.MainActivity;
 import com.suresh.bakenjoy2.R;
+import com.suresh.bakenjoy2.Utils.Constants;
 import com.suresh.bakenjoy2.Utils.JsonUtils;
 import com.suresh.bakenjoy2.Utils.NetworkUtils;
 import com.suresh.bakenjoy2.adaptor.MainRecipeAdaptor;
@@ -38,8 +42,8 @@ public class UpdateService extends Service {
             @Override
             public void run() {
                 while(true){
-//                    startJob();
-                    new getRecipesW().execute();
+                    startJob();
+//                    new getRecipesW().execute();
                     try {
                         Thread.sleep(60000);
                     } catch (InterruptedException e) {
@@ -55,50 +59,55 @@ public class UpdateService extends Service {
         return super.onStartCommand(intent, flags, startId);
     }
 
-//    private void startJob() {
-//
-//        // generates random number
-//        Random random = new Random();
-//        int randomInt = random.nextInt(100);
-//        String lastUpdate = "R: "+randomInt;
-//
-//        // Reaches the view on widget and displays the number
-//        RemoteViews view = new RemoteViews(getPackageName(), R.layout.bake_app_widget);
-//        view.setTextViewText(R.id.appwidget_text, lastUpdate);
-//        ComponentName theWidget = new ComponentName(this, BakeAppWidget.class);
-//        AppWidgetManager manager = AppWidgetManager.getInstance(this);
-//        manager.updateAppWidget(theWidget, view);
-//    }
+    private void startJob() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        String restoredText = prefs.getString(Constants.SHARED_PREFERENCES, null);
+        ArrayList<MainRecipes> recipes= JsonUtils.getRecipeList(restoredText);
 
-    @SuppressLint("StaticFieldLeak")
-    public class getRecipesW extends AsyncTask<Void, Void, ArrayList<MainRecipes>> {
-
-        @Override
-        protected ArrayList<MainRecipes> doInBackground(Void... voids) {
-            try {
-                return JsonUtils.getRecipeList(NetworkUtils.getResponseFromHttpUrl(recipeUrl()));
-            } catch(IOException e) {
-                e.printStackTrace();
-            }
-            return null;
+        int num = (int) (Math.random() * (3));
+        RemoteViews view = new RemoteViews(getPackageName(), R.layout.bake_app_widget);
+        ArrayList<Ingredients> ingredients = recipes.get(num).getIngredients();
+        String data= "";
+        for(Ingredients ingredients1: ingredients){
+            data+= ingredients1.getIngredient() + "\n";
         }
+        view.setTextViewText(R.id.appwidget_text, recipes.get(num).getName());
+        view.setTextViewText(R.id.ingredient_text,data);
+        ComponentName theWidget = new ComponentName(getApplicationContext(), BakeAppWidget.class);
+        AppWidgetManager manager = AppWidgetManager.getInstance(getApplicationContext());
+        manager.updateAppWidget(theWidget, view);
 
-        @Override
-        protected void onPostExecute(ArrayList<MainRecipes> recipes) {
-//            int num = 0 + (int)Math.random()*(3-0) ;
-            int num = (int) (Math.random() * (3));
-            RemoteViews view = new RemoteViews(getPackageName(), R.layout.bake_app_widget);
-            ArrayList<Ingredients> ingredients = recipes.get(num).getIngredients();
-            String data= "";
-            for(Ingredients ingredients1: ingredients){
-                data+= ingredients1.getIngredient() + "\n";
-            }
-            view.setTextViewText(R.id.appwidget_text, recipes.get(num).getName());
-            view.setTextViewText(R.id.ingredient_text,data);
-            ComponentName theWidget = new ComponentName(getApplicationContext(), BakeAppWidget.class);
-            AppWidgetManager manager = AppWidgetManager.getInstance(getApplicationContext());
-            manager.updateAppWidget(theWidget, view);
-            super.onPostExecute(recipes);
-        }
     }
+
+//    @SuppressLint("StaticFieldLeak")
+//    public class getRecipesW extends AsyncTask<Void, Void, ArrayList<MainRecipes>> {
+//
+//        @Override
+//        protected ArrayList<MainRecipes> doInBackground(Void... voids) {
+//            try {
+//                return JsonUtils.getRecipeList(NetworkUtils.getResponseFromHttpUrl(recipeUrl()));
+//            } catch(IOException e) {
+//                e.printStackTrace();
+//            }
+//            return null;
+//        }
+//
+//        @Override
+//        protected void onPostExecute(ArrayList<MainRecipes> recipes) {
+////            int num = 0 + (int)Math.random()*(3-0) ;
+//            int num = (int) (Math.random() * (3));
+//            RemoteViews view = new RemoteViews(getPackageName(), R.layout.bake_app_widget);
+//            ArrayList<Ingredients> ingredients = recipes.get(num).getIngredients();
+//            String data= "";
+//            for(Ingredients ingredients1: ingredients){
+//                data+= ingredients1.getIngredient() + "\n";
+//            }
+//            view.setTextViewText(R.id.appwidget_text, recipes.get(num).getName());
+//            view.setTextViewText(R.id.ingredient_text,data);
+//            ComponentName theWidget = new ComponentName(getApplicationContext(), BakeAppWidget.class);
+//            AppWidgetManager manager = AppWidgetManager.getInstance(getApplicationContext());
+//            manager.updateAppWidget(theWidget, view);
+//            super.onPostExecute(recipes);
+//        }
+//    }
 }
