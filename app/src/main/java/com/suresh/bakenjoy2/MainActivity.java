@@ -4,9 +4,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
@@ -20,7 +20,8 @@ import com.suresh.bakenjoy2.datamodel.MainRecipes;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import static com.suresh.bakenjoy2.Utils.Constants.SHARED_PREFERENCES;
+import am.appwise.components.ni.NoInternetDialog;
+
 import static com.suresh.bakenjoy2.Utils.NetworkUtils.recipeUrl;
 
 public class MainActivity extends AppCompatActivity {
@@ -28,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private MainRecipeAdaptor adapter;
     private ArrayList<MainRecipes> mainRecipesList;
+    private NoInternetDialog noInternetDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +45,9 @@ public class MainActivity extends AppCompatActivity {
         }
         mainRecipesList = new ArrayList<>();
 
+        noInternetDialog = new NoInternetDialog.Builder(this).build();
+
+
         new getRecipes().execute();
 
 
@@ -55,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
         Gson gson = new Gson();
         String json = gson.toJson(responseFromHttpUrl);
         prefsEditor.putString(Constants.SHARED_PREFERENCES, json);
-        prefsEditor.commit();
+        prefsEditor.apply();
     }
 
     public class getRecipes extends AsyncTask<Void, Void, ArrayList<MainRecipes>>{
@@ -83,5 +88,11 @@ public class MainActivity extends AppCompatActivity {
             }
             super.onPostExecute(recipes);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        noInternetDialog.onDestroy();
     }
 }
