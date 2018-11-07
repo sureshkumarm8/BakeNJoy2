@@ -20,7 +20,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".adaptor.MainRecipeAdaptor" />
-        <activity android:name=".DetailsActivity" />
+        <activity android:name=".DetailsActivity"
+        android:configChanges="orientation|screenSize|layoutDirection">
+        </activity>
 
         <receiver android:name=".Widget.BakeAppWidget">
             <intent-filter>
