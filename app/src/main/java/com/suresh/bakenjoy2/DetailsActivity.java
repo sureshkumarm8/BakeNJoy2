@@ -1,10 +1,11 @@
 package com.suresh.bakenjoy2;
 
 import android.content.Intent;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.widget.Toast;
+import android.support.v4.app.FragmentManager;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 
 import com.suresh.bakenjoy2.Fragments.IngredientsFragment;
 import com.suresh.bakenjoy2.Fragments.InstructionsFragment;
@@ -20,6 +21,11 @@ public class DetailsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
+
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
 
         mFragmentManager = getSupportFragmentManager();
         mTabLayout = findViewById(R.id.tablet_layout) != null;
@@ -70,6 +76,16 @@ public class DetailsActivity extends AppCompatActivity {
         if(mBundle != null){
             outState.putBundle(Constants.RECIPE_BUNDLE , mBundle);
         }
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home) {
+            getSupportFragmentManager().popBackStack();
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
 }
