@@ -1,11 +1,5 @@
 package com.suresh.bakenjoy2.Utils;
 
-import android.content.Context;
-import android.preference.PreferenceManager;
-import android.support.test.espresso.IdlingResource;
-
-import com.suresh.bakenjoy2.R;
-
 public class Constants {
 
     public static final String RECIPE_URL = "https://d17h27t6h515a5.cloudfront.net/topher/2017/May/59121517_baking/baking.json";
@@ -39,5 +33,5 @@ public class Constants {
     public static String SHARED_PREFERENCES = "MyPrefs";
 
 
-
+    public static String KEY_PLAY_WHEN_READY = "playWhenReady";
 }

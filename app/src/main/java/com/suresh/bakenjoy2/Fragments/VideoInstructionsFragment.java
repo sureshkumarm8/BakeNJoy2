@@ -9,6 +9,7 @@ import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -60,6 +61,8 @@ public class VideoInstructionsFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
     private Button mButtonP;
+    private Uri videoUri;
+    private boolean playWhenReady;
 
     public VideoInstructionsFragment() {
         // Required empty public constructor
@@ -73,6 +76,7 @@ public class VideoInstructionsFragment extends Fragment {
         if(savedInstanceState != null){
             mResumePosition = savedInstanceState.getLong(Constants.CURRENT_POSITION);
             mBundle = savedInstanceState.getBundle(Constants.STEP_BUNDLE);
+            playWhenReady = savedInstanceState.getBoolean(Constants.KEY_PLAY_WHEN_READY);
             if(mBundle != null) {
                 mStep = mBundle.getParcelable(Constants.STEP);
                 mRecipe = mBundle.getParcelable(Constants.RECIPE);
@@ -103,7 +107,8 @@ public class VideoInstructionsFragment extends Fragment {
 
         if(!mStep.getVideoURL().isEmpty()){
             mPlayerView.setVisibility(View.VISIBLE);
-            initPlayer(Uri.parse(mStep.getVideoURL()));
+            videoUri = Uri.parse(mStep.getVideoURL());
+//            initPlayer(Uri.parse(mStep.getVideoURL()));
         }else {
 
             mPlayerView.setVisibility(View.GONE);
@@ -253,7 +258,29 @@ public class VideoInstructionsFragment extends Fragment {
 
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (Util.SDK_INT > 23) {
+            initPlayer(videoUri);
+        }
+    }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mExoPlayer != null) {
+            //resuming properly
+            mExoPlayer.setPlayWhenReady(playWhenReady);
+            mExoPlayer.seekTo(mResumePosition);
+        } else {
+            //Correctly initialize and play properly fromm seekTo function
+//            initializeMedia();
+            initPlayer(videoUri);
+            mExoPlayer.setPlayWhenReady(playWhenReady);
+            mExoPlayer.seekTo(mResumePosition);
+        }
+    }
     private void initPlayer(Uri uri){
         if(mExoPlayer == null){
             // Create an instance of the ExoPlayer.
@@ -309,5 +336,14 @@ public class VideoInstructionsFragment extends Fragment {
             outState.putBundle(Constants.STEP_BUNDLE , mBundle);
             outState.putLong(Constants.CURRENT_POSITION, mResumePosition);
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home) {
+            getActivity().onBackPressed();
+        }
+        return true;
     }
 }

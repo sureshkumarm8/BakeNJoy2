@@ -78,14 +78,21 @@ public class DetailsActivity extends AppCompatActivity {
         }
     }
 
+
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
+
         if (id == android.R.id.home) {
-            getSupportFragmentManager().popBackStack();
-            finish();
-            return true;
+            if (getSupportFragmentManager().getBackStackEntryCount() == 1) {
+                getSupportFragmentManager().popBackStack();
+                finish();
+            } else {
+                super.onBackPressed();
+            }
         }
-        return super.onOptionsItemSelected(item);
+        return true;
     }
 
 }
