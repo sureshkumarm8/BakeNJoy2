@@ -18,6 +18,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.google.android.exoplayer2.DefaultLoadControl;
+import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.LoadControl;
 import com.google.android.exoplayer2.SimpleExoPlayer;
@@ -26,7 +27,7 @@ import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
-import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
+import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.squareup.picasso.Picasso;
@@ -47,7 +48,7 @@ import com.suresh.bakenjoy2.datamodel.Step;
 public class VideoInstructionsFragment extends Fragment {
 
 
-    public SimpleExoPlayerView mPlayerView;
+    public PlayerView mPlayerView;
     public SimpleExoPlayer mExoPlayer;
     public TextView mDetailView;
     public Button mButton;
@@ -63,6 +64,10 @@ public class VideoInstructionsFragment extends Fragment {
     private Button mButtonP;
     private Uri videoUri;
     private boolean playWhenReady;
+    private boolean mPlayWhenReady = true;
+    private String PLAY_WHEN_READY_KEY = "play_when_ready_key ";
+    private String CURRENT_VIDEO_PLAY_POSITION_KEY = "current_video_play_position_key";
+    private long mVideoPlayingPosition;
 
     public VideoInstructionsFragment() {
         // Required empty public constructor
@@ -73,10 +78,21 @@ public class VideoInstructionsFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+    }
+
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        View rootView = inflater.inflate(R.layout.fragment_video_instructions, container, false);
+
+
         if(savedInstanceState != null){
             mResumePosition = savedInstanceState.getLong(Constants.CURRENT_POSITION);
             mBundle = savedInstanceState.getBundle(Constants.STEP_BUNDLE);
             playWhenReady = savedInstanceState.getBoolean(Constants.KEY_PLAY_WHEN_READY);
+            mVideoPlayingPosition = savedInstanceState.getLong(CURRENT_VIDEO_PLAY_POSITION_KEY);
+            mPlayWhenReady = savedInstanceState.getBoolean(PLAY_WHEN_READY_KEY);
             if(mBundle != null) {
                 mStep = mBundle.getParcelable(Constants.STEP);
                 mRecipe = mBundle.getParcelable(Constants.RECIPE);
@@ -88,13 +104,6 @@ public class VideoInstructionsFragment extends Fragment {
                 mRecipe = mBundle.getParcelable(Constants.RECIPE);
             }
         }
-    }
-
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_video_instructions, container, false);
 
         mPlayerView = rootView.findViewById(R.id.exoplayer_view);
         mDetailView = rootView.findViewById(R.id.step_detail_text_view);
@@ -118,6 +127,7 @@ public class VideoInstructionsFragment extends Fragment {
                     .placeholder(R.drawable.baking_image)
                     .into(mImageView);
         }
+
 
         return rootView;
     }
@@ -281,18 +291,26 @@ public class VideoInstructionsFragment extends Fragment {
             mExoPlayer.seekTo(mResumePosition);
         }
     }
+
     private void initPlayer(Uri uri){
         if(mExoPlayer == null){
             // Create an instance of the ExoPlayer.
             TrackSelector trackSelector = new DefaultTrackSelector();
             LoadControl loadControl = new DefaultLoadControl();
-            mExoPlayer = ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector, loadControl);
+            mExoPlayer = ExoPlayerFactory.newSimpleInstance(new DefaultRenderersFactory(getContext()), trackSelector, loadControl);
             mPlayerView.setPlayer(mExoPlayer);
+
             // Prepare the MediaSource.
             String userAgent = Util.getUserAgent(getContext(), "BakingApp");
-            MediaSource mediaSource = new ExtractorMediaSource(uri, new DefaultDataSourceFactory(
-                    getContext(), userAgent), new DefaultExtractorsFactory(), null, null);
+            DefaultDataSourceFactory dataSourceFactory = new DefaultDataSourceFactory(getActivity(), userAgent);
+            DefaultExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+//            MediaSource mediaSource = new ExtractorMediaSource(uri, dataSourceFactory, extractorsFactory, null, null);
+            MediaSource mediaSource = new ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(uri);
             mExoPlayer.prepare(mediaSource);
+
+            if (mVideoPlayingPosition != 0) {
+                mExoPlayer.seekTo(mVideoPlayingPosition);
+            }
             mExoPlayer.setPlayWhenReady(true);
         }
     }
@@ -313,6 +331,7 @@ public class VideoInstructionsFragment extends Fragment {
             ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) mPlayerView.getLayoutParams();
             params.width= ViewGroup.LayoutParams.MATCH_PARENT;
             params.height= ViewGroup.LayoutParams.MATCH_PARENT;
+//            hideSystemUi();
             mPlayerView.setLayoutParams(params);
             mScrollView.setVisibility(View.GONE);
             getActivity().getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE);
@@ -328,13 +347,26 @@ public class VideoInstructionsFragment extends Fragment {
         }
     }
 
+    private void hideSystemUi() {
+        mPlayerView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+    }
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
+        if (mExoPlayer != null) {
+            mPlayWhenReady = mExoPlayer.getPlayWhenReady();
+            mResumePosition = mExoPlayer.getCurrentPosition();
+        }
         if(mBundle != null){
             outState.putBundle(Constants.STEP_BUNDLE , mBundle);
             outState.putLong(Constants.CURRENT_POSITION, mResumePosition);
+            outState.putBoolean(PLAY_WHEN_READY_KEY, mPlayWhenReady);
         }
     }
 

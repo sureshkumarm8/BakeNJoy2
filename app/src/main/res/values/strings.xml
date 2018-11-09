@@ -22,4 +22,5 @@
         <item>Yellow Cake</item>
         <item>Cheesecake</item>
     </string-array>
+    <bool name="isTablet">false</bool>
 </resources>
